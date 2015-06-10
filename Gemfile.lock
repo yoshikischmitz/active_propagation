@@ -22,6 +22,7 @@ GEM
       tzinfo (~> 1.1)
     arel (6.0.0)
     builder (3.2.2)
+    database_cleaner (1.4.1)
     diff-lcs (1.2.5)
     i18n (0.7.0)
     json (1.8.3)
@@ -51,6 +52,7 @@ PLATFORMS
 DEPENDENCIES
   active_propagation!
   bundler (~> 1.8)
+  database_cleaner
   rake (~> 10.0)
   rspec
   sqlite3
