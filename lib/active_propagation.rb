@@ -1,6 +1,8 @@
-require "active_propagation/version"
 require 'active_record'
+require "active_propagation/version"
+require "active_propagation/extensions"
 
 module ActivePropagation
-  # Your code goes here...
 end
+
+ActiveRecord::Base.send(:extend, ActivePropagation::ClassExtensions)
