@@ -9,5 +9,6 @@ Gem::Specification.new do |s|
   s.files       = ["lib/active_propagation.rb"]
   s.add_development_dependency "rake"
   s.add_development_dependency "bundler"
-  s.test_files = spec.files.grep(%r{^(test|spec|features)/})
+  s.add_development_dependency "rspec"
+  s.test_files = s.files.grep(%r{^(test|spec|features)/})
 end
