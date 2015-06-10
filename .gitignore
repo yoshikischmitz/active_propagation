@@ -9,3 +9,4 @@
 /tmp/
 /vendor
 *.sqlite3
+.swp
