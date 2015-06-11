@@ -53,9 +53,11 @@ describe ActivePropagation do
     it "only runs one job per key" do
       Post.send(:propagates_changes_to, :posts, only: [:text])
       Post.send(:propagates_changes_to, :posts, only: [:text])
-      allow(ActivePropagation::Propagater).to receive(:new).and_return(PropagaterMock.new)
+      mock = PropagaterMock.new
+      allow(ActivePropagation::Propagater).to receive(:new).and_return(mock)
+      allow(mock).to receive(:run).and_return(true)
       @post._run_active_propagation
-      expect(ActivePropagation::Propagater).to have_received(:new).with(@post, :posts, only: [:text])
+      expect(mock).to have_received(:run).once
     end
   end
 end
