@@ -8,6 +8,7 @@ require "active_propagation/propagater_helper"
 module ActivePropagation
   class AbstractPropagater
     include PropagaterHelper
+
     def initialize(model, association, only: )
       @model, @association, @only = model, association, only
     end
@@ -53,7 +54,7 @@ module ActivePropagation
     def perform(klass_str, model_id, assoc_str, only_arr, nested_async)
       klass = klass_str.constantize
       model = klass.find(model_id)
-      PROPAGATERS[async].new(model, assocation, only: only)
+      PROPAGATERS[nested_async].new(model, assoc_str.to_sym, only: only_arr).run
     end
   end
 end
