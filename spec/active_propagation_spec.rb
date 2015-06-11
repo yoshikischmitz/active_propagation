@@ -7,10 +7,6 @@ describe ActivePropagation do
   end
 
   describe "activerecord extensions" do
-    before do
-      Post.send(:propagates_changes_to, :posts, only: [:text])
-    end
-
     it "should register propgate_changes_to as a class method" do
       expect(Post).to respond_to(:propagates_changes_to)
     end
