@@ -3,9 +3,11 @@ require 'sidekiq'
 require "active_propagation/version"
 require "active_propagation/class_extensions"
 require "active_propagation/instance_extensions"
+require "active_propagation/propagater_helper"
 
 module ActivePropagation
   class AbstractPropagater
+    include PropagaterHelper
     def initialize(model, association, only: )
       @model, @association, @only = model, association, only
     end
@@ -17,10 +19,6 @@ module ActivePropagation
     private
 
     attr_reader :model, :association, :only
-
-    def propagated_attributes(model, only)
-      only.map{|x| [x, model.attributes[x]]}.to_h
-    end
   end
 
   class AsyncPropagater < AbstractPropagater
