@@ -50,7 +50,7 @@ describe ActivePropagation do
       expect(ActivePropagation::Propagater).to have_received(:new).with(@post, :posts, only: [:text])
     end
 
-    it "should instantiate a synchronous propagater with asynchronous propagation if set" do
+    it "should instantiate an asynchronous propagater with asynchronous propagation if set" do
       Post.send(:propagates_changes_to, :posts, only: [:text], async: true)
       allow(ActivePropagation::Worker).to receive(:perform_async)
       @post._run_active_propagation
