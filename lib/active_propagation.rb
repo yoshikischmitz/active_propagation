@@ -16,12 +16,11 @@ module ActivePropagation
 
     private
 
+    attr_reader :model, :association, :only
 
     def propagated_attributes(model, only)
       only.map{|x| [x, model.attributes[x]]}.to_h
     end
-
-    attr_reader :model, :association, :only
   end
 
   class AsyncPropagater < AbstractPropagater
