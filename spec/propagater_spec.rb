@@ -26,8 +26,8 @@ RSpec.describe ActivePropagation::Propagater do
 
       @propagater = ActivePropagation::Propagater.new(model, :association, only: [:stuff])
       @propagater.run
-      expect(association1).to have_received(:update)
-      expect(association2).to have_received(:update)
+      expect(association1).to have_received(:update).with({stuff: :things})
+      expect(association2).to have_received(:update).with({stuff: :things})
     end
   end
 end
