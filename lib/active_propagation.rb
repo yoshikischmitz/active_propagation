@@ -5,7 +5,6 @@ require "active_propagation/class_extensions"
 require "active_propagation/instance_extensions"
 
 module ActivePropagation
-
   class AbstractPropagater
     def initialize(model, association, only: )
       @model, @association, @only = model, association, only
