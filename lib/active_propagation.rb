@@ -16,6 +16,11 @@ module ActivePropagation
 
     private
 
+
+    def propagated_attributes(model, only)
+      only.map{|x| [x, model.attributes[x]]}.to_h
+    end
+
     attr_reader :model, :association, :only
   end
 
@@ -30,7 +35,7 @@ module ActivePropagation
   class Propagater < AbstractPropagater
     def run
       model.send(association).each do |a|
-        a.update propagated_attributes
+        a.update propagated_attributes(model, only)
       end
     end
   end
@@ -53,10 +58,6 @@ module ActivePropagation
       model = klass.find(model_id)
       PROPAGATERS[async].new(model, assocation, only: only)
     end
-  end
-
-  def propagated_attributes(model, only)
-    only.map{|x| [x, model.attributes[x]]}.to_h
   end
 end
 
