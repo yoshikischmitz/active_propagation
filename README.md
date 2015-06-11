@@ -13,6 +13,8 @@ class Post < ActiveRecord::Base
   belongs_to :post
   has_many :sub_posts
 
-
+  propagates_changes_to :sub_posts, only: [:title], on: [:update], async: true
 end
 ```
+
+This will register an `after_commit` callback that will fire a Sidekiq worker to set the titles of all of the sub_posts to be the same as their parent post.
