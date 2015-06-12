@@ -40,6 +40,7 @@ module ActivePropagation
 
   class LoopWorker 
     include Sidekiq::Worker
+    include PropagaterHelper
     def perform(model_class_str, model_id, association_id, only_arr)
       klass = model_class_str.constantize
       model = klass.find(model_id)
