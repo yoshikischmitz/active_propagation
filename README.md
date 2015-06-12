@@ -22,4 +22,4 @@ This will register an `after_commit` callback that will fire a Sidekiq worker to
 Caveats:
 - Currently the only supported job system is Sidekiq. The plan is to make this configurable for multiple backends(probably using ActiveJob).
 - The callbacks are executed `after_commit`. This is to make sure it plays nicely with Sidekiq.
-- Deletion is not supported. I think it's best to use `ActiveRecord`'s `dependent_destroy` option for that.
+- Deletion is not supported. I think it's best to use `ActiveRecord`'s `dependent_destroy` option for that(I wouldn't be opposed to adding it if anyone needs async deletion).
