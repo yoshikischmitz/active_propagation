@@ -51,8 +51,8 @@ module ActivePropagation
   class AsyncDeletor < AbstractPropagaterWorker
     def perform(klass_str, model_id, assoc, only)
       klass = klass_str.constantize
-       Propagater.new(klass, association, model_id).run do |a| 
-         AsyncLoopDeletor.perform_async(klass.to_s, assoc_id)
+       Propagater.new(klass, assoc, model_id).run do |a| 
+         AsyncLoopDeletor.perform_async(klass.to_s, a.id)
        end
     end
   end
@@ -91,7 +91,7 @@ module ActivePropagation
     extend PropagaterHelper
     def self.run(klass_str, model_id, assoc, only)
       klass = klass_str.constantize
-      Propagater.new(klass, association, model_id).run do |a|
+      Propagater.new(klass, assoc, model_id).run do |a|
         a.destroy
       end
     end
