@@ -6,6 +6,8 @@ load File.dirname(__FILE__) + '/support/schema.rb'
 load File.dirname(__FILE__) + '/support/models.rb'
 
 require 'database_cleaner'
+require 'sidekiq/testing'
+Sidekiq::Testing.inline!
 
 RSpec.configure do |config|
   config.before(:suite) do

@@ -44,24 +44,34 @@ describe ActivePropagation do
       end
     end
 
-    it "should instantiate a synchronous propagater with synchronous propagation by default" do
-      allow(ActivePropagation::Propagater).to receive(:new).and_return(PropagaterMock.new)
+    it "should run a synchronous updater with synchronous updates by default" do
+      Post.send(:propagates_changes_to, :posts, only: [:text])
+      allow(ActivePropagation::Updater).to receive(:run)
       @post._run_active_propagation
-      expect(ActivePropagation::Propagater).to have_received(:new).with(@post, :posts, only: [:text])
+      expect(ActivePropagation::Updater).to have_received(:run).with("Post", @post.id, "posts", [:text])
     end
 
-    it "should instantiate an asynchronous propagater with asynchronous propagation if set" do
+    it "should run an asynchronous updater with asynchronous propagation if set" do
       Post.send(:propagates_changes_to, :posts, only: [:text], async: true)
-      allow(ActivePropagation::Worker).to receive(:perform_async)
+      allow(ActivePropagation::AsyncUpdater).to receive(:run)
       @post._run_active_propagation
-      expect(ActivePropagation::Worker).to have_received(:perform_async).with("Post", @post.id, 'posts', [:text], false)
+      expect(ActivePropagation::AsyncUpdater).to have_received(:run).with("Post", @post.id, "posts", [:text])
     end
 
-    it "should instantiate a synchronous propagater with asynchronous propagation if set" do
-      Post.send(:propagates_changes_to, :posts, only: [:text], nested_async: true)
-      allow(ActivePropagation::AsyncPropagater).to receive(:new).and_return(PropagaterMock.new)
+    it "should run an asynchronous deletor if set" do
+      Post.send(:propagates_changes_to, :posts, only: [:text], async: true)
+      @post.destroy
+      allow(ActivePropagation::AsyncDeletor).to receive(:run)
       @post._run_active_propagation
-      expect(ActivePropagation::AsyncPropagater).to have_received(:new).with(@post, :posts, only: [:text])
+      expect(ActivePropagation::AsyncDeletor).to have_received(:run).with("Post", @post.id, "posts", [:text])
+    end
+
+    it "should run a deletor if set" do
+      Post.send(:propagates_changes_to, :posts, only: [:text])
+      @post.destroy
+      allow(ActivePropagation::Deletor).to receive(:run)
+      @post._run_active_propagation
+      expect(ActivePropagation::Deletor).to have_received(:run).with("Post", @post.id, "posts", [:text])
     end
 
     it "only runs one job per key" do
