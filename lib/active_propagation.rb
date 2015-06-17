@@ -30,7 +30,7 @@ module ActivePropagation
     end
 
     private
-    
+
     attr_reader :klass, :association, :id
   end
 
