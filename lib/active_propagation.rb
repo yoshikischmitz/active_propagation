@@ -18,12 +18,16 @@ module ActivePropagation
     end 
 
     def assocs
-      klass.where(foreign_key => id) 
+      assoc_klass.where(foreign_key => id) 
     end 
 
     def foreign_key
       klass.reflections[association.to_s].foreign_key
     end 
+
+    def assoc_klass
+      klass.reflections[association.to_s].class_name.constantize
+    end
 
     private
     
