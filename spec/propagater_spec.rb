@@ -47,3 +47,18 @@ RSpec.describe "Deletors" do
     end
   end
 end
+
+RSpec.describe "propagater" do
+  describe "It handles multiple classes" do
+    before do
+      @post = Post.create
+      @other = OtherPost.create(post: @post)
+    end
+    
+    it "should find all of the remotes for a different class" do
+      ActivePropagation::Propagater.new(Post, :other_posts, @post.id).run do |a|
+        expect(a).to eq(@other)
+      end
+    end
+  end
+end
