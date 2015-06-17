@@ -6,56 +6,94 @@ require "active_propagation/instance_extensions"
 require "active_propagation/propagater_helper"
 
 module ActivePropagation
-  class AbstractPropagater
-    include PropagaterHelper
+  class Propagater
+    def initialize(klass, association, id)
+      @klass, @association, @id = klass, association, id
+    end 
 
-    def initialize(model, association, only: )
-      @model, @association, @only = model, association, only
-    end
-    
-    def run
-      raise NotImplementedError
-    end
+    def run 
+      assocs.each do |a| 
+        yield a
+      end 
+    end 
+
+    def assocs
+      klass.where(foreign_key => id) 
+    end 
+
+    def foreign_key
+      klass.reflections[association.to_s].foreign_key
+    end 
 
     private
-
-    attr_reader :model, :association, :only
+    
+    attr_reader :klass, :association, :id
   end
 
-  class AsyncPropagater < AbstractPropagater
-    def run
-      model.send(association).each do |a|
-        LoopWorker.perform_async(model.class.to_s, model.id, a.id, only)
-      end
+  class AbstractPropagaterWorker
+    include PropagaterHelper
+    include Sidekiq::Worker
+
+    def self.run(klass_str, model_id, assoc, only)
+      self.perform_async(klass_str, model_id, assoc, only)
     end
   end
 
-  class Propagater < AbstractPropagater
-    def run
-      model.send(association).each do |a|
-        a.update propagated_attributes(model, only)
-      end
+  class AsyncLoopDeletor
+    include PropagaterHelper
+    include Sidekiq::Worker
+    def perform(klass_str, assoc_id)
+      klass = klass_str.constantize
+      klass.find(assoc_id).destroy
+    end 
+  end
+
+  class AsyncDeletor < AbstractPropagaterWorker
+    def perform(klass_str, model_id, assoc, only)
+      klass = klass_str.constantize
+       Propagater.new(klass, association, model_id).run do |a| 
+         AsyncLoopDeletor.perform_async(klass.to_s, assoc_id)
+       end
     end
   end
 
-  class LoopWorker 
+  class AsyncLoopUpdater
     include Sidekiq::Worker
     include PropagaterHelper
-    def perform(model_class_str, model_id, association_id, only_arr)
-      klass = model_class_str.constantize
-      model = klass.find(model_id)
-      association = klass.find(association_id)
-      association.update(propagated_attributes(model, only_arr))
-    end
-  end
-  
-  PROPAGATERS = {true => AsyncPropagater, false => Propagater}
-  class Worker
-    include Sidekiq::Worker
-    def perform(klass_str, model_id, assoc_str, only_arr, nested_async)
+    def perform(klass_str, model_id, assoc_id, only)
       klass = klass_str.constantize
       model = klass.find(model_id)
-      PROPAGATERS[nested_async].new(model, assoc_str.to_sym, only: only_arr).run
+      klass.find(assoc_id).update(propagated_attributes(model, only))
+    end 
+  end
+
+  class AsyncUpdater < AbstractPropagaterWorker
+    def perform(klass_str, model_id, assoc, only)
+      klass = klass_str.constantize
+      Propagater.new(klass, assoc, model_id).run do |a| 
+        AsyncLoopUpdater.perform_async(klass.to_s, model_id, a.id, only)
+      end 
+    end 
+  end
+
+  class Updater
+    extend PropagaterHelper
+    def self.run(klass_str, model_id, assoc, only)
+      klass = klass_str.constantize
+      model = klass.find(model_id)
+      Propagater.new(klass, assoc, model_id).run do |a| 
+        a.update(propagated_attributes(model, only))
+      end 
+    end 
+  end
+
+  class Deletor
+    extend PropagaterHelper
+    def self.run(klass_str, model_id, assoc, only)
+      klass = klass_str.constantize
+      Propagater.new(klass, association, model_id).run do |a|
+        a.destroy
+      end
     end
   end
 end
