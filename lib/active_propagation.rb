@@ -17,19 +17,23 @@ module ActivePropagation
       end 
     end 
 
+    private
+
     def assocs
       assoc_klass.where(foreign_key => id) 
     end 
 
     def foreign_key
-      klass.reflections[association.to_s].foreign_key
+      reflection.foreign_key
     end 
 
     def assoc_klass
-      klass.reflections[association.to_s].class_name.constantize
+      reflection.class_name.constantize
     end
 
-    private
+    def reflection
+      klass.reflections.with_indifferent_access[association]
+    end
 
     attr_reader :klass, :association, :id
   end
