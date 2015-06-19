@@ -9,7 +9,7 @@ module ActivePropagation::InstanceExtensions
         else
           ActivePropagation::Deletor.run(*args)
         end
-      else
+      elsif (previous_changes.keys & config[:only]).any?
         if config[:async]
           ActivePropagation::AsyncUpdater.run(*args)
         else
