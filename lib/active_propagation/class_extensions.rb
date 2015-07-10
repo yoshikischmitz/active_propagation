@@ -6,7 +6,10 @@ module ActivePropagation::ClassExtensions
       {}
     end
     self.class_variable_set(:@@propagations, props)
+    before_save(:_save_active_propagation_changes, on: on) unless _commit_callbacks.map(&:filter).include?(:_save_active_propagation_changes)
     after_commit(:_run_active_propagation, on: on) unless _commit_callbacks.map(&:filter).include?(:_run_active_propagation)
     self.class_variable_get(:@@propagations)[association] = {only: only, async: async, nested_async: nested_async}
   end
+
+  attr_reader :_active_propagation_changes
 end
