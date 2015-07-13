@@ -10,3 +10,4 @@
 /vendor
 *.sqlite3
 *.swp
+*.gem
