@@ -32,7 +32,7 @@ describe ActivePropagation do
     before do
       Post.send(:propagates_changes_to, :posts, only: [:text])
       @post = Post.create
-      allow(@post).to receive(:_active_propagation_changes).and_return({text: ""})
+      @post.instance_variable_set(:@_active_propagation_changes, {text: ""})
     end
 
     it "should instantiate a synchronous propagater with synchronous propagation by default" do

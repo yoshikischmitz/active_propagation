@@ -1,4 +1,7 @@
 module ActivePropagation::InstanceExtensions
+
+  attr_reader :_active_propagation_changes
+
   def _run_active_propagation
     klass = self.class
     klass.class_variable_get(:@@propagations).each do |association, config|
@@ -9,7 +12,7 @@ module ActivePropagation::InstanceExtensions
         else
           ActivePropagation::Deletor.run(*args)
         end
-      elsif (_active_propagation_changes.keys & config[:only]).any?
+      elsif (_active_propagation_changes.keys.map(&:to_s) & config[:only].map(&:to_s)).any?
         if config[:async]
           ActivePropagation::AsyncUpdater.run(*args)
         else
@@ -20,6 +23,6 @@ module ActivePropagation::InstanceExtensions
   end
 
   def _save_active_propagation_changes 
-    @_active_propagation_changes = self.changes
+    @_active_propagation_changes ||= self.changes
   end
 end

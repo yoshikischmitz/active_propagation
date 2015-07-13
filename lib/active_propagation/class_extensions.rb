@@ -11,5 +11,5 @@ module ActivePropagation::ClassExtensions
     self.class_variable_get(:@@propagations)[association] = {only: only, async: async, nested_async: nested_async}
   end
 
-  attr_reader :_active_propagation_changes
+  attr_accessor :_active_propagation_changes
 end
