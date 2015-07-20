@@ -75,10 +75,10 @@ module ActivePropagation
   end
 
   class AsyncUpdater < AbstractPropagaterWorker
-    def perform(klass_str, model_id, assoc, only, assoc_klass_str)
+    def perform(klass_str, model_id, assoc, only)
       klass = klass_str.constantize
-      Propagater.new(klass, assoc, model_id).run do |a| 
-        AsyncLoopUpdater.perform_async(klass.to_s, model_id, a.id, only, assoc_klass_str.to_s)
+      Propagater.new(klass, assoc, model_id).run do |a, assoc_klass| 
+        AsyncLoopUpdater.perform_async(klass.to_s, model_id, a.id, only, assoc_klass.to_s)
       end 
     end 
   end

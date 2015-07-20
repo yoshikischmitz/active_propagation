@@ -17,7 +17,7 @@ RSpec.describe "Updaters" do
 
   describe "Async Updater" do
     it "should update each of the associations with the same data" do
-      ActivePropagation::AsyncUpdater.new.perform(@post.class.to_s, @post.id, :posts, [:text], "Post")
+      ActivePropagation::AsyncUpdater.new.perform(@post.class.to_s, @post.id, :posts, [:text])
       expect(@remote1.reload.text).to eq("hello world")
       expect(@remote2.reload.text).to eq("hello world")
     end
