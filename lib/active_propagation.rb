@@ -19,20 +19,20 @@ module ActivePropagation
 
     private
 
-    def assocs
-      assoc_klass.where(foreign_key => id) 
-    end 
-
-    def foreign_key
-      reflection.foreign_key
-    end 
-
     def assoc_klass
       reflection.class_name.constantize
     end
 
     def reflection
       klass.reflections.with_indifferent_access[association]
+    end
+
+    def model
+      klass.find(id)
+    end
+
+    def assocs
+      model.send(association)
     end
 
     attr_reader :klass, :association, :id
@@ -70,7 +70,8 @@ module ActivePropagation
     def perform(klass_str, model_id, assoc_id, only, assoc_klass_str)
       klass = klass_str.constantize
       model = klass.find(model_id)
-      assoc_klass_str.constantize.find(assoc_id).update(propagated_attributes(model, only))
+      assoc_model = assoc_klass_str.constantize.find(assoc_id)
+      assoc_model.update(propagated_attributes(model, only))
     end 
   end
 
