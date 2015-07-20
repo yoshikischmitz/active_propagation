@@ -13,7 +13,7 @@ module ActivePropagation
 
     def run 
       assocs.each do |a| 
-        yield a
+        yield a, assoc_klass
       end 
     end 
 
@@ -50,17 +50,16 @@ module ActivePropagation
   class AsyncLoopDeletor
     include PropagaterHelper
     include Sidekiq::Worker
-    def perform(klass_str, assoc_id)
-      klass = klass_str.constantize
-      klass.find(assoc_id).destroy
+    def perform(assoc_klass_str, assoc_id)
+      assoc_klass_str.constantize.find(assoc_id).destroy
     end 
   end
 
   class AsyncDeletor < AbstractPropagaterWorker
     def perform(klass_str, model_id, assoc, only)
       klass = klass_str.constantize
-       Propagater.new(klass, assoc, model_id).run do |a| 
-         AsyncLoopDeletor.perform_async(klass.to_s, a.id)
+       Propagater.new(klass, assoc, model_id).run do |a, assoc_klass| 
+         AsyncLoopDeletor.perform_async(assoc_klass.to_s, a.id)
        end
     end
   end
@@ -68,18 +67,18 @@ module ActivePropagation
   class AsyncLoopUpdater
     include Sidekiq::Worker
     include PropagaterHelper
-    def perform(klass_str, model_id, assoc_id, only)
+    def perform(klass_str, model_id, assoc_id, only, assoc_klass_str)
       klass = klass_str.constantize
       model = klass.find(model_id)
-      klass.find(assoc_id).update(propagated_attributes(model, only))
+      assoc_klass_str.constantize.find(assoc_id).update(propagated_attributes(model, only))
     end 
   end
 
   class AsyncUpdater < AbstractPropagaterWorker
-    def perform(klass_str, model_id, assoc, only)
+    def perform(klass_str, model_id, assoc, only, assoc_klass_str)
       klass = klass_str.constantize
       Propagater.new(klass, assoc, model_id).run do |a| 
-        AsyncLoopUpdater.perform_async(klass.to_s, model_id, a.id, only)
+        AsyncLoopUpdater.perform_async(klass.to_s, model_id, a.id, only, assoc_klass_str.to_s)
       end 
     end 
   end

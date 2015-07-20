@@ -17,7 +17,7 @@ RSpec.describe "Updaters" do
 
   describe "Async Updater" do
     it "should update each of the associations with the same data" do
-      ActivePropagation::AsyncUpdater.new.perform(@post.class.to_s, @post.id, :posts, [:text])
+      ActivePropagation::AsyncUpdater.new.perform(@post.class.to_s, @post.id, :posts, [:text], "Post")
       expect(@remote1.reload.text).to eq("hello world")
       expect(@remote2.reload.text).to eq("hello world")
     end
@@ -56,8 +56,9 @@ RSpec.describe "propagater" do
     end
     
     it "should find all of the remotes for a different class" do
-      ActivePropagation::Propagater.new(Post, :other_posts, @post.id).run do |a|
+      ActivePropagation::Propagater.new(Post, :other_posts, @post.id).run do |a, assoc_klass|
         expect(a).to eq(@other)
+        expect(assoc_klass).to eq(OtherPost)
       end
     end
   end

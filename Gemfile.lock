@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_propagation (0.2.6)
+    active_propagation (0.2.7)
       activerecord (~> 4.0)
       activesupport (~> 4.0)
       sidekiq
