@@ -22,6 +22,14 @@ RSpec.describe "Updaters" do
       expect(@remote2.reload.text).to eq("hello world")
     end
   end
+
+  describe "Async Updater" do
+    it "should update associations of different classes with the same data" do
+      @other = OtherPost.create(post: @post, text: "none")
+      ActivePropagation::AsyncUpdater.new.perform(@post.class.to_s, @post.id, :other_posts, [:text])
+      expect(@other.reload.text).to eq("hello world")
+    end
+  end
 end
 
 RSpec.describe "Deletors" do
